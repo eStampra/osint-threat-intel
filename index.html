@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT ANALYST — Training Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a0f;
+    --bg2: #0b1118;
+    --bg3: #0f1921;
+    --panel: #111d27;
+    --border: #1a3344;
+    --border2: #0d4a6e;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --accent3: #ff6b35;
+    --accent4: #ffcc00;
+    --red: #ff3355;
+    --text: #c8dde8;
+    --text-dim: #5a7a8e;
+    --text-bright: #e8f4ff;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+    --glow2: 0 0 20px rgba(0,255,157,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events:none;
+    z-index:9999;
+  }
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top:0;
+    z-index: 100;
+    box-shadow: 0 2px 30px rgba(0,212,255,0.1);
+  }
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px var(--accent);
+  }
+  .logo span { color: var(--accent2); }
+  .topbar-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 24px;
+  }
+  .topbar-meta b { color: var(--accent); }
+  nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  nav button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav button:hover { color: var(--accent); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .panel::before {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    border-radius: 4px 4px 0 0;
+  }
+  .panel.green::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .panel.amber::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+  .panel.orange::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .panel.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title.green { color: var(--accent2); }
+  .panel-title.amber { color: var(--accent4); }
+  .panel-title.orange { color: var(--accent3); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  @media(max-width:1000px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .val {
+    font-family: 'Orbitron', monospace;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    line-height: 1;
+  }
+  .stat-card .val.green { color: var(--accent2); text-shadow: var(--glow2); }
+  .stat-card .val.amber { color: var(--accent4); }
+  .stat-card .val.orange { color: var(--accent3); }
+  .stat-card .label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; font-family: 'Share Tech Mono', monospace; }
+  .progress-row { margin-bottom: 12px; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+  .progress-label .pct { color: var(--accent); font-family:'Share Tech Mono',monospace; }
+  .progress-track { height: 8px; background: var(--bg3); border-radius: 2px; overflow: hidden; border: 1px solid var(--border); }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; position: relative; }
+  .progress-fill::after { content:''; position:absolute; right:0;top:0;bottom:0; width:4px; background: rgba(255,255,255,0.6); box-shadow: 0 0 8px rgba(255,255,255,0.8); }
+  .fill-blue { background: linear-gradient(90deg, #0080a0, var(--accent)); }
+  .fill-green { background: linear-gradient(90deg, #008040, var(--accent2)); }
+  .fill-amber { background: linear-gradient(90deg, #806000, var(--accent4)); }
+  .fill-orange { background: linear-gradient(90deg, #803020, var(--accent3)); }
+  .phase-timeline { display: flex; gap: 0; margin-bottom: 24px; }
+  .phase-block { flex: 1; padding: 16px 12px; border: 1px solid var(--border); border-right: none; background: var(--bg3); transition: all 0.2s; position: relative; overflow: hidden; }
+  .phase-block:last-child { border-right: 1px solid var(--border); }
+  .phase-block:hover { background: var(--panel); }
+  .phase-num { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 900; opacity: 0.12; position: absolute; top: 8px; right: 8px; }
+  .phase-label { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .phase-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .phase-duration { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 2px solid var(--border2); }
+  th { text-align: left; padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: rgba(0,212,255,0.03); }
+  tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: 'Share Tech Mono', monospace; }
+  .tag-blue { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .tag-green { background: rgba(0,255,157,0.12); color: var(--accent2); border: 1px solid rgba(0,255,157,0.25); }
+  .tag-amber { background: rgba(255,204,0,0.12); color: var(--accent4); border: 1px solid rgba(255,204,0,0.25); }
+  .tag-orange { background: rgba(255,107,53,0.12); color: var(--accent3); border: 1px solid rgba(255,107,53,0.25); }
+  .tag-red { background: rgba(255,51,85,0.12); color: var(--red); border: 1px solid rgba(255,51,85,0.25); }
+  .task-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .task-item:hover { background: rgba(0,212,255,0.04); }
+  .task-item:last-child { border-bottom: none; }
+  .task-check { width: 18px; height: 18px; border: 2px solid var(--border2); border-radius: 2px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .task-item.done .task-check { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 8px var(--accent2); }
+  .task-item.done .task-check::after { content: '✓'; color: var(--bg); font-size: 11px; font-weight: 900; }
+  .task-item.done .task-text { opacity: 0.4; text-decoration: line-through; }
+  .task-time { margin-left: auto; flex-shrink: 0; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent); white-space: nowrap; }
+  .day-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .day-btn { padding: 8px 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; line-height: 1.4; }
+  .day-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .day-btn.active { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(0,212,255,0.2); }
+  .day-btn.work { border-left: 3px solid var(--accent3); }
+  .day-btn.off { border-left: 3px solid var(--accent2); }
+  .milestone-line { display: flex; align-items: center; gap: 0; margin: 24px 0; }
+  .milestone-dot { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg3); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; flex-shrink: 0; position: relative; z-index: 1; }
+  .milestone-dot.done { border-color: var(--accent2); background: rgba(0,255,157,0.15); color: var(--accent2); box-shadow: 0 0 12px rgba(0,255,157,0.4); }
+  .milestone-dot.active { border-color: var(--accent); background: rgba(0,212,255,0.15); color: var(--accent); box-shadow: 0 0 12px rgba(0,212,255,0.4); animation: pulse 2s infinite; }
+  .milestone-dot.future { color: var(--text-dim); }
+  .milestone-line-seg { flex: 1; height: 2px; background: var(--border); }
+  .milestone-line-seg.done { background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 12px rgba(0,212,255,0.4)} 50%{box-shadow:0 0 20px rgba(0,212,255,0.8)} }
+  .project-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+  .project-header { padding: 14px 18px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+  .project-header:hover { background: rgba(0,212,255,0.06); }
+  .project-title { font-weight: 700; font-size: 16px; }
+  .project-body { padding: 18px; display: none; }
+  .project-body.open { display: block; }
+  .step-list { }
+  .step-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .step-item:last-child { border-bottom: none; }
+  .step-num { width: 24px; height: 24px; background: rgba(0,212,255,0.1); border: 1px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .cv-bullet { padding: 10px 14px; border-left: 3px solid var(--accent2); background: rgba(0,255,157,0.04); margin-bottom: 8px; font-size: 13px; border-radius: 0 3px 3px 0; }
+  .readiness-gate { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; margin-bottom: 20px; }
+  .gate-pct { font-family: 'Orbitron', monospace; font-size: 36px; font-weight: 900; color: var(--accent2); text-shadow: var(--glow2); white-space: nowrap; }
+  a { color: var(--accent); text-decoration: none; transition: all 0.2s; }
+  a:hover { color: var(--accent2); }
+  .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+  .section-title { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; color: var(--text-bright); letter-spacing: 2px; }
+  .section-sub { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+  .info-box { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2); border-radius: 4px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; }
+  .warn-box { background: rgba(255,204,0,0.06); border: 1px solid rgba(255,204,0,0.2); border-radius: 4px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; }
+  .mono { font-family: 'Share Tech Mono', monospace; }
+  .dim { color: var(--text-dim); }
+  .bright { color: var(--text-bright); }
+  .accent { color: var(--accent); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .small { font-size: 12px; }
+  .mb8 { margin-bottom: 8px; }
+  .mb16 { margin-bottom: 16px; }
+  .mb20 { margin-bottom: 20px; }
+  code { background: rgba(0,212,255,0.1); padding: 1px 5px; border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--accent2); }
+  .cert-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 18px; }
+  .cert-name { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .cert-body { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+  .cert-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; font-size: 13px; }
+  .cert-row .lbl { color: var(--text-dim); min-width: 80px; font-size: 11px; font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 1px; padding-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">OSINT<span>::</span>ANALYST</div>
+  <div class="topbar-meta">
+    <span>ROTA: <b>5-ON / 4-OFF</b></span>
+    <span>TARGET: <b>4–5 MONTHS</b></span>
+    <span id="clock" class="mono"></span>
+  </div>
+</div>
+
+<nav>
+  <button class="active" onclick="showSection('dashboard',this)">Dashboard</button>
+  <button onclick="showSection('daily',this)">Daily Tasks</button>
+  <button onclick="showSection('resources',this)">Resources</button>
+  <button onclick="showSection('projects',this)">Portfolio</button>
+  <button onclick="showSection('skills',this)">Skill Tracker</button>
+  <button onclick="showSection('certs',this)">Certifications</button>
+  <button onclick="showSection('jobs',this)">Job Readiness</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <div class="section-header">
+    <div class="section-title">MISSION OVERVIEW</div>
+    <div class="section-sub">// CYBERSECURITY &amp; THREAT INTELLIGENCE ANALYST — OSINT TRACK</div>
+  </div>
+
+  <div class="grid-4 mb20">
+    <div class="stat-card"><div class="val">~5%</div><div class="label">Overall Progress</div></div>
+    <div class="stat-card"><div class="val green">18</div><div class="label">Weeks to Target</div></div>
+    <div class="stat-card"><div class="val amber">9</div><div class="label">Day Rota Cycle</div></div>
+    <div class="stat-card"><div class="val orange">4</div><div class="label">Phases Total</div></div>
+  </div>
+
+  <div class="panel mb20">
+    <div class="panel-title">◈ TRAINING MILESTONES</div>
+    <div class="milestone-line">
+      <div class="milestone-dot done">GO</div>
+      <div class="milestone-line-seg done"></div>
+      <div class="milestone-dot active">P1</div>
+      <div class="milestone-line-seg"></div>
+      <div class="milestone-dot future">P2</div>
+      <div class="milestone-line-seg"></div>
+      <div class="milestone-dot future">60%</div>
+      <div class="milestone-line-seg"></div>
+      <div class="milestone-dot future">P3</div>
+      <div class="milestone-line-seg"></div>
+      <div class="milestone-dot future">S+</div>
+      <div class="milestone-line-seg"></div>
+      <div class="milestone-dot future">JOB</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;margin-top:4px;padding:0 2px">
+      <span>Wk 0</span><span>Wk 4</span><span>Wk 8</span><span>Wk 11</span><span>Wk 14</span><span>Wk 17</span><span>Wk 18</span>
+    </div>
+  </div>
+
+  <div class="phase-timeline mb20">
+    <div class="phase-block" style="border-top:2px solid #00d4ff">
+      <div class="phase-num" style="color:#00d4ff">1</div>
+      <div class="phase-label" style="color:#00d4ff">Phase 01</div>
+      <div class="phase-title">Foundations</div>
+      <div class="phase-duration">Weeks 1–4 · ~40 hrs</div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-fill fill-blue" style="width:10%"></div></div>
+    </div>
+    <div class="phase-block" style="border-top:2px solid #00ff9d">
+      <div class="phase-num" style="color:#00ff9d">2</div>
+      <div class="phase-label" style="color:#00ff9d">Phase 02</div>
+      <div class="phase-title">Intermediate</div>
+      <div class="phase-duration">Weeks 5–9 · ~55 hrs</div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-fill fill-green" style="width:0%"></div></div>
+    </div>
+    <div class="phase-block" style="border-top:2px solid #ffcc00">
+      <div class="phase-num" style="color:#ffcc00">3</div>
+      <div class="phase-label" style="color:#ffcc00">Phase 03</div>
+      <div class="phase-title">Advanced OSINT</div>
+      <div class="phase-duration">Weeks 10–14 · ~60 hrs</div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-fill fill-amber" style="width:0%"></div></div>
+    </div>
+    <div class="phase-block" style="border-top:2px solid #ff6b35">
+      <div class="phase-num" style="color:#ff6b35">4</div>
+      <div class="phase-label" style="color:#ff6b35">Phase 04</div>
+      <div class="phase-title">Job-Ready Sprint</div>
+      <div class="phase-duration">Weeks 15–18 · ~40 hrs</div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-fill fill-orange" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="panel mb20">
+    <div class="panel-title">◈ PHASE BREAKDOWN — WHAT YOU LEARN AND DELIVER</div>
+    <table>
+      <thead><tr><th>Phase</th><th>Core Topics</th><th>Key Tools</th><th>Deliverable</th><th>Pass Gate</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-blue">P1 Foundations</span><br><span class="dim small">Wks 1–4</span></td>
+          <td>Networking basics, Linux CLI, OSINT fundamentals, Security+ Domains 1–2, threat actor types, CIA triad, IOC basics</td>
+          <td>Kali Linux, Shodan, WHOIS, theHarvester, Maltego CE, Google Dorking, Recon-ng</td>
+          <td>OSINT Footprint Report (Project 1), GitHub repo live</td>
+          <td><span class="tag tag-green">70%+ practice quiz</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">P2 Intermediate</span><br><span class="dim small">Wks 5–9</span></td>
+          <td>CTI lifecycle, MITRE ATT&CK, STIX/TAXII, dark web concepts, Security+ Domains 3–5, log analysis, incident response</td>
+          <td>MISP, OpenCTI, SpiderFoot, Censys, VirusTotal, Abuse.ch, ThreatFox, Any.run</td>
+          <td>APT Threat Actor Profile (Project 2), ATT&CK Navigator map on GitHub</td>
+          <td><span class="tag tag-amber">2 TryHackMe paths done</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-amber">P3 Advanced OSINT</span><br><span class="dim small">Wks 10–14</span></td>
+          <td>Social media OSINT, geolocation, image OSINT, malware IOC analysis, Security+ Domains 6+, phishing analysis, CTI sharing</td>
+          <td>ExifTool, SunCalc, Wayback Machine, Yandex reverse image, URLscan.io, Bellingcat toolkit</td>
+          <td>Phishing Analysis (Project 3), Geolocation Report (Project 4), portfolio published</td>
+          <td><span class="tag tag-orange">Security+ mock 80%+</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-orange">P4 Job Sprint</span><br><span class="dim small">Wks 15–18</span></td>
+          <td>Full CTI Report (Project 5), CV + LinkedIn polish, Security+ final prep, interview prep, job applications</td>
+          <td>All prior tools, interview flashcards</td>
+          <td>5-project portfolio, polished CV, 10+ applications sent, Security+ booked</td>
+          <td><span class="tag tag-red">First interview booked</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel green">
+      <div class="panel-title green">◈ STUDY BUDGET PER 9-DAY CYCLE</div>
+      <table>
+        <thead><tr><th>Day Type</th><th>Count</th><th>Hrs/Day</th><th>Cycle Total</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-orange">Work Day</span></td><td>5</td><td>1 hr</td><td>5 hrs</td></tr>
+          <tr><td><span class="tag tag-green">Day Off</span></td><td>4</td><td>3–5 hrs</td><td>12–20 hrs</td></tr>
+          <tr style="font-weight:700"><td colspan="3" class="bright">Per-Cycle Total</td><td style="color:var(--accent2)">17–25 hrs</td></tr>
+          <tr><td colspan="3" class="dim small">Monthly estimate (~3.3 cycles)</td><td style="color:var(--accent4)" class="small">~55–80 hrs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel amber">
+      <div class="panel-title amber">◈ OVERALL SKILL READINESS</div>
+      <div class="progress-row"><div class="progress-label"><span>OSINT Fundamentals</span><span class="pct">5%</span></div><div class="progress-track"><div class="progress-fill fill-blue" style="width:5%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span>Threat Intelligence</span><span class="pct">0%</span></div><div class="progress-track"><div class="progress-fill fill-green" style="width:0%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span>Security Fundamentals</span><span class="pct">5%</span></div><div class="progress-track"><div class="progress-fill fill-amber" style="width:5%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span>Practical Lab Skills</span><span class="pct">0%</span></div><div class="progress-track"><div class="progress-fill fill-orange" style="width:0%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span>Report Writing</span><span class="pct">0%</span></div><div class="progress-track"><div class="progress-fill fill-blue" style="width:0%"></div></div></div>
+      <div class="info-box small" style="margin-top:12px;margin-bottom:0">Update the <strong>Skill Tracker</strong> tab as you progress — bars here will reflect your real readiness.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY TASKS -->
+<div id="daily" class="section">
+  <div class="section-header">
+    <div class="section-title">DAILY TASK SYSTEM</div>
+    <div class="section-sub">// 9-DAY ROTA CYCLE — EXACT TASKS, NO GUESSING</div>
+  </div>
+  <div class="info-box">
+    <span class="accent">◈ HOW THIS WORKS:</span> Your rota repeats every 9 days (5 work + 4 off). Select any day below. Each task has an exact action, time estimate, and required output. Tick tasks complete — your progress saves automatically. The cycle repeats across all 4 phases; the format stays the same, the content advances.
+  </div>
+  <div class="day-selector" id="day-selector"></div>
+  <div id="day-content"></div>
+</div>
+
+<!-- RESOURCES -->
+<div id="resources" class="section">
+  <div class="section-header">
+    <div class="section-title">LEARNING RESOURCES</div>
+    <div class="section-sub">// VERIFIED REAL LINKS — ZERO PLACEHOLDERS</div>
+  </div>
+  <div class="grid-2 mb20">
+    <div class="panel">
+      <div class="panel-title">◈ FREE OSINT TRAINING</div>
+      <table>
+        <thead><tr><th>Resource</th><th>Type</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://osintframework.com" target="_blank">OSINT Framework</a><br><span class="dim small">Interactive map of every OSINT tool and category</span></td><td><span class="tag tag-blue">Reference</span></td><td>P1</td></tr>
+          <tr><td><a href="https://www.bellingcat.com/category/resources/how-tos/" target="_blank">Bellingcat How-To Guides</a><br><span class="dim small">Investigative OSINT from the best in the field</span></td><td><span class="tag tag-blue">Guide</span></td><td>P2+</td></tr>
+          <tr><td><a href="https://gralhix.com/list-of-osint-exercises/" target="_blank">OSINT Exercises by Sofia Santos</a><br><span class="dim small">Progressive challenges with solutions — excellent practice</span></td><td><span class="tag tag-green">Practice</span></td><td>P1+</td></tr>
+          <tr><td><a href="https://www.myosint.training/courses/introduction-to-osint" target="_blank">My OSINT Training — Free Intro</a><br><span class="dim small">Free structured introduction course</span></td><td><span class="tag tag-green">Free Course</span></td><td>P1</td></tr>
+          <tr><td><a href="https://www.tracelabs.org/initiatives/search-party" target="_blank">TraceLabs OSINT Challenges</a><br><span class="dim small">Live competitive OSINT for missing persons — builds real credibility</span></td><td><span class="tag tag-green">Competition</span></td><td>P2+</td></tr>
+          <tr><td><a href="https://academy.tcm-sec.com/p/osint-fundamentals" target="_blank">TCM Security — OSINT Fundamentals</a><br><span class="dim small">~$30, instructor-led, highly regarded in the community</span></td><td><span class="tag tag-amber">Low-cost</span></td><td>P1</td></tr>
+          <tr><td><a href="https://tryhackme.com/path/outline/presecurity" target="_blank">TryHackMe — Pre-Security Path</a><br><span class="dim small">Beginner structured path, free tier</span></td><td><span class="tag tag-green">Lab</span></td><td>P1</td></tr>
+          <tr><td><a href="https://tryhackme.com/path/outline/soclevel1" target="_blank">TryHackMe — SOC Level 1 Path</a><br><span class="dim small">Threat intel, SIEM, phishing, IR — directly relevant</span></td><td><span class="tag tag-green">Lab</span></td><td>P2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel green">
+      <div class="panel-title green">◈ SECURITY+ FREE TRAINING</div>
+      <table>
+        <thead><tr><th>Resource</th><th>Type</th><th>Est. Hours</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://www.youtube.com/playlist?list=PLG49S3nxzAnl4QDVqK-hOnoqcSKEIDDuv" target="_blank">Professor Messer — SY0-701 Complete Course</a><br><span class="dim small">The gold standard free Sec+ course — full coverage</span></td><td><span class="tag tag-green">Video</span></td><td>~25 hrs</td></tr>
+          <tr><td><a href="https://www.professormesser.com/security-plus/sy0-701/sy0-701-study-group/" target="_blank">Professor Messer — Free Study Groups</a><br><span class="dim small">Weekly live sessions with Q&amp;A</span></td><td><span class="tag tag-green">Live</span></td><td>Weekly</td></tr>
+          <tr><td><a href="https://www.examcompass.com/comptia/security-plus-certification/free-security-plus-practice-tests" target="_blank">ExamCompass — Free Practice Tests</a><br><span class="dim small">Domain-by-domain practice questions</span></td><td><span class="tag tag-blue">Practice</span></td><td>Ongoing</td></tr>
+          <tr><td><a href="https://quizlet.com/subject/comptia-security%2B/" target="_blank">Quizlet — Security+ Flashcard Decks</a><br><span class="dim small">Community-built flashcards for all domains</span></td><td><span class="tag tag-blue">Flashcards</span></td><td>Ongoing</td></tr>
+          <tr><td><a href="https://www.reddit.com/r/CompTIA/wiki/resources/" target="_blank">r/CompTIA Resource Wiki</a><br><span class="dim small">Community-curated resource list — check before buying anything</span></td><td><span class="tag tag-blue">Reference</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2 mb20">
+    <div class="panel amber">
+      <div class="panel-title amber">◈ THREAT INTELLIGENCE RESOURCES</div>
+      <table>
+        <thead><tr><th>Resource</th><th>What It Covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://attack.mitre.org" target="_blank">MITRE ATT&CK Framework</a></td><td>Adversary TTPs — the essential CTI reference. Memorise the tactic names.</td></tr>
+          <tr><td><a href="https://mitre-attack.github.io/attack-navigator/" target="_blank">ATT&CK Navigator (web)</a></td><td>Create heatmaps of actor TTPs — used in Project 2</td></tr>
+          <tr><td><a href="https://otx.alienvault.com" target="_blank">AlienVault OTX</a></td><td>Free threat exchange — IOC feeds, pulse subscriptions, actor tracking</td></tr>
+          <tr><td><a href="https://abuse.ch" target="_blank">Abuse.ch (MalwareBazaar, URLhaus)</a></td><td>Live malware and phishing IOC feeds — hands-on analysis material</td></tr>
+          <tr><td><a href="https://tryhackme.com/room/cyberthreatintel" target="_blank">TryHackMe — Cyber Threat Intel Room</a></td><td>Free room: CTI frameworks, STIX, TAXII, MISP intro</td></tr>
+          <tr><td><a href="https://www.recordedfuture.com/threat-intelligence-101" target="_blank">Recorded Future — CTI 101</a></td><td>Excellent vendor-produced intro to the full CTI lifecycle</td></tr>
+          <tr><td><a href="https://www.cisa.gov/news-events/alerts" target="_blank">CISA Alerts &amp; Advisories</a></td><td>US govt real-time threat advisories — essential daily reading in P3+</td></tr>
+          <tr><td><a href="https://www.ncsc.gov.uk/section/keep-up-to-date/threat-reports" target="_blank">NCSC Threat Reports (UK)</a></td><td>UK-specific threat intelligence — directly relevant for UK job market</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel orange">
+      <div class="panel-title orange">◈ YOUTUBE CHANNELS</div>
+      <table>
+        <thead><tr><th>Channel</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://www.youtube.com/@TCMSecurityAcademy" target="_blank">TCM Security</a></td><td>OSINT walkthroughs, recon, hands-on labs — very high quality</td></tr>
+          <tr><td><a href="https://www.youtube.com/@GeraldAuger" target="_blank">Gerald Auger — Simply Cyber</a></td><td>Career advice, CTI, SOC path — follow closely from Day 1</td></tr>
+          <tr><td><a href="https://www.youtube.com/@TheOSINTion" target="_blank">The OSINTion</a></td><td>Dedicated OSINT — practical tool demos and techniques</td></tr>
+          <tr><td><a href="https://www.youtube.com/@JohnHammond010" target="_blank">John Hammond</a></td><td>CTF walkthroughs, malware analysis, tool demos</td></tr>
+          <tr><td><a href="https://www.youtube.com/@DavidBombal" target="_blank">David Bombal</a></td><td>Networking, Kali Linux, interview-relevant walkthroughs</td></tr>
+          <tr><td><a href="https://www.youtube.com/@SecurityNow" target="_blank">Security Now (Steve Gibson)</a></td><td>Weekly deep-dive threat news — builds analyst awareness</td></tr>
+          <tr><td><a href="https://www.youtube.com/@hak5darren" target="_blank">Hak5</a></td><td>Hardware, red team context — useful background knowledge</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">◈ PRACTICAL LAB PLATFORMS</div>
+    <div class="grid-3">
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--accent)">TryHackMe</strong> — <a href="https://tryhackme.com" target="_blank">tryhackme.com</a></div>
+        <div class="dim small mb8">Browser-based VMs, no setup. Complete: Pre-Security → SOC Level 1 → Threat Intel paths. Free tier covers 80% of what you need in P1–P2.</div>
+        <span class="tag tag-green">Free Tier</span>
+      </div>
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--accent2)">CyberDefenders</strong> — <a href="https://cyberdefenders.org" target="_blank">cyberdefenders.org</a></div>
+        <div class="dim small mb8">Blue-team labs: network forensics, threat hunting, OSINT challenges. Strong for CTI and analyst roles. Completely free, very high quality.</div>
+        <span class="tag tag-green">Free</span>
+      </div>
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--accent4)">LetsDefend</strong> — <a href="https://letsdefend.io" target="_blank">letsdefend.io</a></div>
+        <div class="dim small mb8">Simulated SOC: alert triage, phishing analysis, incident response. Closest thing to real SOC work available for free.</div>
+        <span class="tag tag-amber">Free + Paid</span>
+      </div>
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--accent3)">Hack The Box</strong> — <a href="https://app.hackthebox.com/tracks" target="_blank">hackthebox.com</a></div>
+        <div class="dim small mb8">SOC Analyst track. More advanced — ideal for P3+. Free tier with limited machines. Good for standing out from crowd.</div>
+        <span class="tag tag-green">Free Tier</span>
+      </div>
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--text-bright)">Kali Linux VM</strong> — <a href="https://www.kali.org/get-kali/" target="_blank">kali.org</a></div>
+        <div class="dim small mb8">Download and run in VirtualBox (free). Essential for running theHarvester, Recon-ng, Maltego, Nmap locally. Set up in Week 1 Day 1.</div>
+        <span class="tag tag-green">Free</span>
+      </div>
+      <div style="padding:4px">
+        <div class="mb8"><strong style="color:var(--text-bright)">Shodan</strong> — <a href="https://www.shodan.io" target="_blank">shodan.io</a></div>
+        <div class="dim small mb8">Search engine for internet-connected devices. Create a free account. Core OSINT reconnaissance tool — used in nearly every real investigation.</div>
+        <span class="tag tag-green">Free Tier</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="section">
+  <div class="section-header">
+    <div class="section-title">PORTFOLIO PROJECTS</div>
+    <div class="section-sub">// 5 GITHUB-READY DELIVERABLES — BUILT STEP BY STEP</div>
+  </div>
+  <div class="info-box">
+    <span class="accent">◈ STRATEGY:</span> Each project goes on GitHub as a polished markdown write-up. Recruiters check your GitHub. These 5 projects demonstrate: OSINT methodology, threat actor analysis, phishing/IOC analysis, geolocation investigation, and full CTI reporting — exactly what analysts do on Day 1.
+  </div>
+
+  <div class="project-card">
+    <div class="project-header" onclick="toggleProject('proj1')">
+      <div><span class="tag tag-blue" style="margin-bottom:6px;display:inline-block">PROJECT 1 · PHASE 1 · WEEKS 3–4</span><div class="project-title">OSINT Footprinting Report — Public Target</div></div>
+      <span style="color:var(--text-dim);font-size:20px">▾</span>
+    </div>
+    <div class="project-body" id="proj1">
+      <div class="grid-2">
+        <div>
+          <div class="mb8"><strong class="accent">Objective:</strong> Perform a complete passive OSINT footprint on a public company. Use a small real business (not a major corporation). Document every finding methodically to analyst standard.</div>
+          <div class="mb8"><strong class="accent">Tools:</strong> theHarvester, Shodan (free), WHOIS / who.is, DNSdumpster, Google Dorking, LinkedIn, Wayback Machine, Hunter.io (free tier)</div>
+          <hr>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num">1</div><div>Choose target: small business, non-sensitive sector. Write a rules-of-engagement.md file — scope, what you will/won't do, disclaimers. This shows professionalism to recruiters.</div></div>
+            <div class="step-item"><div class="step-num">2</div><div>Run <code>theHarvester -d [domain] -b all</code> in Kali. Log all emails, subdomains, and IPs. Screenshot output.</div></div>
+            <div class="step-item"><div class="step-num">3</div><div>Search Shodan.io for the company's IP range. Document exposed services, open ports, SSL certificate data.</div></div>
+            <div class="step-item"><div class="step-num">4</div><div>WHOIS via who.is — note registrar, creation date, name servers. Try reverse WHOIS to find associated domains.</div></div>
+            <div class="step-item"><div class="step-num">5</div><div>Google Dorking: <code>site:[domain]</code>, <code>filetype:pdf site:[domain]</code>, <code>"@[domain]" filetype:xlsx</code>. Document any sensitive exposures found.</div></div>
+            <div class="step-item"><div class="step-num">6</div><div>LinkedIn search for employees. Note job titles and any tech stack mentions in profiles (reveals internal tools).</div></div>
+            <div class="step-item"><div class="step-num">7</div><div>Wayback Machine on the domain — look for old exposed data or removed sensitive pages.</div></div>
+            <div class="step-item"><div class="step-num">8</div><div>Write report: Executive Summary → Methodology → Findings + Screenshots → Risk Assessment → Recommendations. Push to GitHub.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel green mb16">
+            <div class="panel-title green small">◈ GITHUB DELIVERABLE</div>
+            <div class="dim small mb8">Repo name: <code>osint-footprint-report-01</code></div>
+            <ul style="color:var(--text-dim);font-size:12px;padding-left:16px">
+              <li><code>README.md</code> — overview, scope, tools used</li>
+              <li><code>report.md</code> — full findings document</li>
+              <li><code>rules-of-engagement.md</code></li>
+              <li><code>methodology.md</code> — your OSINT process map</li>
+              <li><code>/screenshots/</code> — evidence folder</li>
+            </ul>
+          </div>
+          <div class="panel amber">
+            <div class="panel-title amber small">◈ CV BULLET</div>
+            <div class="cv-bullet">"Conducted passive OSINT footprinting using theHarvester, Shodan, and Google Dorking; produced structured intelligence report identifying exposed assets and actionable risk findings."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="project-header" onclick="toggleProject('proj2')">
+      <div><span class="tag tag-green" style="margin-bottom:6px;display:inline-block">PROJECT 2 · PHASE 2 · WEEKS 6–7</span><div class="project-title">APT Threat Actor Profile — MITRE ATT&CK Mapped</div></div>
+      <span style="color:var(--text-dim);font-size:20px">▾</span>
+    </div>
+    <div class="project-body" id="proj2">
+      <div class="grid-2">
+        <div>
+          <div class="mb8"><strong class="accent">Objective:</strong> Research a real documented APT group and produce an analyst-grade threat actor profile with ATT&CK navigator map. Choose one: Lazarus Group, APT28, Cozy Bear, or Sandworm.</div>
+          <div class="mb8"><strong class="accent">Tools:</strong> <a href="https://attack.mitre.org/groups/" target="_blank">MITRE ATT&CK Groups</a>, ATT&CK Navigator, Malpedia, AlienVault OTX, CISA advisories, open-source reporting</div>
+          <hr>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num">1</div><div>Read your chosen group's full MITRE ATT&CK page. List every technique under each tactic.</div></div>
+            <div class="step-item"><div class="step-num">2</div><div>Open <a href="https://mitre-attack.github.io/attack-navigator/" target="_blank">ATT&CK Navigator</a>. Create a layer highlighting your group's techniques. Export as JSON and SVG for GitHub.</div></div>
+            <div class="step-item"><div class="step-num">3</div><div>Research 3 documented campaigns by this group. For each: date, target sector, initial access method, tools used, published IOCs.</div></div>
+            <div class="step-item"><div class="step-num">4</div><div>Search AlienVault OTX for related pulses. Note any live IOC feeds.</div></div>
+            <div class="step-item"><div class="step-num">5</div><div>Write the profile: Attribution → Motivation → Campaigns → TTP Table → IOC Sample → Detection Recommendations.</div></div>
+            <div class="step-item"><div class="step-num">6</div><div>Add a Defensive Recommendations section — shows you understand blue-team application of CTI.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel green mb16">
+            <div class="panel-title green small">◈ GITHUB DELIVERABLE</div>
+            <div class="dim small mb8">Repo: <code>apt-threat-profile-[groupname]</code></div>
+            <ul style="color:var(--text-dim);font-size:12px;padding-left:16px">
+              <li><code>README.md</code></li>
+              <li><code>threat-profile.md</code></li>
+              <li><code>attack-navigator-layer.json</code></li>
+              <li><code>ioc-sample.csv</code></li>
+              <li><code>/references/</code> — all sources</li>
+            </ul>
+          </div>
+          <div class="panel amber">
+            <div class="panel-title amber small">◈ CV BULLET</div>
+            <div class="cv-bullet">"Produced analyst-grade APT threat actor profile for [Group], mapping TTPs to MITRE ATT&CK and generating actionable detection and mitigation recommendations."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="project-header" onclick="toggleProject('proj3')">
+      <div><span class="tag tag-amber" style="margin-bottom:6px;display:inline-block">PROJECT 3 · PHASE 2–3 · WEEKS 9–10</span><div class="project-title">Phishing Email Analysis — End-to-End IOC Extraction</div></div>
+      <span style="color:var(--text-dim);font-size:20px">▾</span>
+    </div>
+    <div class="project-body" id="proj3">
+      <div class="grid-2">
+        <div>
+          <div class="mb8"><strong class="accent">Objective:</strong> Analyse a real phishing email, extract all IOCs, sandbox the payload, and write a structured analyst report. Source samples from PhishTank or public repos.</div>
+          <div class="mb8"><strong class="accent">Tools:</strong> <a href="https://phishtank.org" target="_blank">PhishTank</a>, <a href="https://app.any.run" target="_blank">Any.run sandbox</a>, VirusTotal, URLscan.io, MXToolbox header analyser</div>
+          <hr>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num">1</div><div>Source a phishing email from PhishTank or <a href="https://github.com/rf-peixoto/phishing_pot" target="_blank">phishing_pot on GitHub</a>. Never open in a live environment.</div></div>
+            <div class="step-item"><div class="step-num">2</div><div>Extract and analyse email headers via MXToolbox. Note originating IP, mail path, SPF/DKIM/DMARC pass or fail.</div></div>
+            <div class="step-item"><div class="step-num">3</div><div>Extract all URLs. Submit each to URLscan.io and VirusTotal. Document scores, redirect chains, hosting provider.</div></div>
+            <div class="step-item"><div class="step-num">4</div><div>Use Any.run public submissions for a known malware sample. Screenshot: network connections, file drops, registry changes.</div></div>
+            <div class="step-item"><div class="step-num">5</div><div>Compile IOC table: IPs, domains, URLs, file hashes (MD5/SHA256), sender email addresses.</div></div>
+            <div class="step-item"><div class="step-num">6</div><div>Write report: Incident Summary → Header Analysis → Payload Analysis → IOC Table → Mitigation Steps.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel green mb16">
+            <div class="panel-title green small">◈ GITHUB DELIVERABLE</div>
+            <div class="dim small mb8">Repo: <code>phishing-analysis-report-01</code></div>
+            <ul style="color:var(--text-dim);font-size:12px;padding-left:16px">
+              <li><code>README.md</code></li>
+              <li><code>analysis-report.md</code></li>
+              <li><code>iocs.csv</code></li>
+              <li><code>/screenshots/</code> — sandbox, VT, URLscan</li>
+            </ul>
+          </div>
+          <div class="panel amber">
+            <div class="panel-title amber small">◈ CV BULLET</div>
+            <div class="cv-bullet">"Analysed phishing emails end-to-end: header inspection, URL sandboxing, IOC extraction and threat intelligence reporting using Any.run, VirusTotal, and URLscan.io."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="project-header" onclick="toggleProject('proj4')">
+      <div><span class="tag tag-orange" style="margin-bottom:6px;display:inline-block">PROJECT 4 · PHASE 3 · WEEKS 12–13</span><div class="project-title">Geolocation OSINT Investigation — Bellingcat Methodology</div></div>
+      <span style="color:var(--text-dim);font-size:20px">▾</span>
+    </div>
+    <div class="project-body" id="proj4">
+      <div class="grid-2">
+        <div>
+          <div class="mb8"><strong class="accent">Objective:</strong> Take a publicly available image from a known challenge and geolocate it using only open-source methods. Document your full reasoning chain.</div>
+          <div class="mb8"><strong class="accent">Tools:</strong> Google Maps/Street View, SunCalc, Yandex Reverse Image Search, ExifTool, Wikimapia, <a href="https://www.geolocation.ninja" target="_blank">geolocation.ninja</a></div>
+          <hr>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num">1</div><div>Source a challenge image from <a href="https://gralhix.com/list-of-osint-exercises/" target="_blank">Sofia Santos OSINT exercises</a> — use a geolocation challenge.</div></div>
+            <div class="step-item"><div class="step-num">2</div><div>Run ExifTool: <code>exiftool image.jpg</code>. Check for GPS data, camera model, timestamps. Note what's present or has been stripped.</div></div>
+            <div class="step-item"><div class="step-num">3</div><div>Identify visual clues: language on signs, architectural style, vegetation, road markings, vehicle types, sky colour and sun angle.</div></div>
+            <div class="step-item"><div class="step-num">4</div><div>Run reverse image searches on Google and Yandex (Yandex is superior for Eastern European / non-Western content).</div></div>
+            <div class="step-item"><div class="step-num">5</div><div>If shadows are visible, use <a href="https://www.suncalc.org" target="_blank">SunCalc</a> to narrow down location and time of day from shadow angle.</div></div>
+            <div class="step-item"><div class="step-num">6</div><div>Confirm via Google Street View and satellite imagery. Document confidence level at each step.</div></div>
+            <div class="step-item"><div class="step-num">7</div><div>Write up: Objective → Evidence Chain (numbered, with screenshots) → Conclusion → Confidence Level Assessment.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel green mb16">
+            <div class="panel-title green small">◈ GITHUB DELIVERABLE</div>
+            <div class="dim small mb8">Repo: <code>osint-geolocation-investigation-01</code></div>
+            <ul style="color:var(--text-dim);font-size:12px;padding-left:16px">
+              <li><code>README.md</code></li>
+              <li><code>investigation-report.md</code></li>
+              <li><code>/evidence/</code> — annotated screenshots</li>
+              <li><code>methodology-notes.md</code></li>
+            </ul>
+          </div>
+          <div class="panel amber">
+            <div class="panel-title amber small">◈ CV BULLET</div>
+            <div class="cv-bullet">"Conducted OSINT geolocation investigation using imagery analysis, shadow geometry, reverse image search, and satellite cross-referencing — documented full evidence chain to investigative standard."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="project-header" onclick="toggleProject('proj5')">
+      <div><span class="tag tag-red" style="margin-bottom:6px;display:inline-block">PROJECT 5 · PHASE 3–4 · WEEKS 14–15</span><div class="project-title">Full Threat Intelligence Report — Current Threat</div></div>
+      <span style="color:var(--text-dim);font-size:20px">▾</span>
+    </div>
+    <div class="project-body" id="proj5">
+      <div class="grid-2">
+        <div>
+          <div class="mb8"><strong class="accent">Objective:</strong> Produce a full strategic and tactical threat intelligence report on a current threat — ransomware campaign, sector-specific threat, or recent major incident. This is your flagship portfolio piece.</div>
+          <div class="mb8"><strong class="accent">Tools:</strong> All prior tools + CISA advisories, NCSC reports, Mandiant/Secureworks public blogs, ATT&CK Navigator</div>
+          <hr>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num">1</div><div>Choose a recent incident (within 12 months). Sources: <a href="https://www.cisa.gov/news-events/alerts" target="_blank">CISA Alerts</a>, <a href="https://www.ncsc.gov.uk/section/keep-up-to-date/threat-reports" target="_blank">NCSC Threat Reports</a>.</div></div>
+            <div class="step-item"><div class="step-num">2</div><div>Write an Executive Summary — 1 page max, suitable for a non-technical manager. This is the most important skill CTI analysts are hired for.</div></div>
+            <div class="step-item"><div class="step-num">3</div><div>Technical Analysis: TTPs mapped to ATT&CK, IOC table, infrastructure analysis using Shodan/Censys lookups.</div></div>
+            <div class="step-item"><div class="step-num">4</div><div>Attribution section: known or suspected actor(s) with confidence levels — High/Medium/Low. Use intelligence assessment language.</div></div>
+            <div class="step-item"><div class="step-num">5</div><div>Impact Assessment: affected sectors, geographic scope, estimated business impact.</div></div>
+            <div class="step-item"><div class="step-num">6</div><div>Mitigation and Recommendations: CISA-aligned mitigations, detection guidance, defensive posture advice.</div></div>
+            <div class="step-item"><div class="step-num">7</div><div>Polish to professional standard. Get feedback on r/cybersecurity or a Discord community before publishing.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel green mb16">
+            <div class="panel-title green small">◈ GITHUB DELIVERABLE</div>
+            <div class="dim small mb8">Repo: <code>threat-intelligence-report-[incident]</code></div>
+            <ul style="color:var(--text-dim);font-size:12px;padding-left:16px">
+              <li><code>README.md</code> — professional overview</li>
+              <li><code>executive-summary.md</code></li>
+              <li><code>full-report.md</code></li>
+              <li><code>ioc-table.csv</code></li>
+              <li><code>attack-navigator.json</code></li>
+              <li><code>/evidence/</code></li>
+            </ul>
+          </div>
+          <div class="panel amber">
+            <div class="panel-title amber small">◈ CV BULLET</div>
+            <div class="cv-bullet">"Authored full threat intelligence report on [incident]: executive summary, MITRE ATT&CK-mapped TTP analysis, IOC extraction, attribution assessment, and mitigation recommendations."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div id="skills" class="section">
+  <div class="section-header">
+    <div class="section-title">SKILL TRACKER</div>
+    <div class="section-sub">// TICK SKILLS AS YOU LEARN THEM — PROGRESS SAVES AUTOMATICALLY</div>
+  </div>
+  <div class="grid-3 mb20">
+    <div class="stat-card"><div class="val" id="osint-pct">0%</div><div class="label">OSINT Skills</div></div>
+    <div class="stat-card"><div class="val green" id="cti-pct">0%</div><div class="label">CTI Skills</div></div>
+    <div class="stat-card"><div class="val amber" id="sec-pct">0%</div><div class="label">Security Fundamentals</div></div>
+  </div>
+  <div class="grid-3">
+    <div class="panel"><div class="panel-title">◈ OSINT SKILLS</div><div id="osint-skills"></div></div>
+    <div class="panel green"><div class="panel-title green">◈ THREAT INTELLIGENCE</div><div id="cti-skills"></div></div>
+    <div class="panel amber"><div class="panel-title amber">◈ SECURITY FUNDAMENTALS</div><div id="sec-skills"></div></div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <div class="panel-title orange">◈ JOB-READY THRESHOLD TRACKER</div>
+    <div class="warn-box">You reach <strong style="color:var(--accent4)">JOB READY</strong> when: OSINT ≥ 75% AND CTI ≥ 70% AND Security ≥ 65% AND at least 3 portfolio projects published to GitHub.</div>
+    <div class="grid-3">
+      <div class="progress-row"><div class="progress-label"><span class="bright">OSINT</span><span class="pct" id="osint-gate">0% / 75%</span></div><div class="progress-track"><div class="progress-fill fill-blue" id="osint-fill" style="width:0%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span class="bright">CTI</span><span class="pct" id="cti-gate">0% / 70%</span></div><div class="progress-track"><div class="progress-fill fill-green" id="cti-fill" style="width:0%"></div></div></div>
+      <div class="progress-row"><div class="progress-label"><span class="bright">Security</span><span class="pct" id="sec-gate">0% / 65%</span></div><div class="progress-track"><div class="progress-fill fill-amber" id="sec-fill" style="width:0%"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CERTS -->
+<div id="certs" class="section">
+  <div class="section-header">
+    <div class="section-title">CERTIFICATION PLAN</div>
+    <div class="section-sub">// PRIORITY ORDER — COSTS AND FREE ALTERNATIVES</div>
+  </div>
+  <div class="info-box">
+    <span class="accent">◈ STRATEGY:</span> Security+ first — it is the hiring manager's baseline filter. CySA+ next — directly mapped to CTI and analyst roles. OSINT-specific certs differentiate you but come later. Certs without projects = weak. Projects without certs = slower to clear HR. You need both.
+  </div>
+  <div class="grid-2 mb20">
+    <div class="cert-card" style="border-top:2px solid var(--accent)">
+      <div class="cert-name" style="color:var(--accent)">CompTIA Security+ (SY0-701)</div>
+      <div class="cert-body">Industry baseline. Required by DoD, NHS Digital, most MSPs and enterprise security teams. The minimum ticket to pass HR filters for analyst roles.</div>
+      <div class="cert-row"><div class="lbl">Priority</div><span class="tag tag-red">CRITICAL — Do First</span></div>
+      <div class="cert-row"><div class="lbl">When</div><span>Sit at end of Phase 3 (Week 14–15)</span></div>
+      <div class="cert-row"><div class="lbl">Cost</div><span>~£339 / $392 exam voucher</span></div>
+      <div class="cert-row"><div class="lbl">Free Prep</div><a href="https://www.youtube.com/playlist?list=PLG49S3nxzAnl4QDVqK-hOnoqcSKEIDDuv" target="_blank">Professor Messer SY0-701 — complete free video course</a></div>
+      <div class="cert-row"><div class="lbl">Practice</div><a href="https://www.examcompass.com/comptia/security-plus-certification/free-security-plus-practice-tests" target="_blank">ExamCompass free tests (by domain)</a></div>
+      <div class="cert-row"><div class="lbl">Discount</div><span class="dim small">Buy during CompTIA sales (Black Friday). Check <a href="https://academic.comptia.org" target="_blank">academic pricing</a> if eligible.</span></div>
+    </div>
+    <div class="cert-card" style="border-top:2px solid var(--accent2)">
+      <div class="cert-name" style="color:var(--accent2)">CompTIA CySA+ (CS0-003)</div>
+      <div class="cert-body">Cybersecurity Analyst — directly mapped to SOC analyst and CTI roles. Covers threat hunting, SIEM, incident response. More relevant to your target role than Security+.</div>
+      <div class="cert-row"><div class="lbl">Priority</div><span class="tag tag-green">HIGH — After Security+</span></div>
+      <div class="cert-row"><div class="lbl">When</div><span>Target Month 7–8 (after job search starts)</span></div>
+      <div class="cert-row"><div class="lbl">Cost</div><span>~£339 / $392 exam voucher</span></div>
+      <div class="cert-row"><div class="lbl">Prereq</div><span>Security+ strongly recommended first</span></div>
+      <div class="cert-row"><div class="lbl">Free Prep</div><a href="https://www.youtube.com/results?search_query=cysa%2B+cs0-003+course" target="_blank">YouTube: search "CySA+ CS0-003 full course"</a></div>
+      <div class="cert-row"><div class="lbl">Paid Prep</div><a href="https://www.udemy.com" target="_blank">Udemy CySA+ course (~£15 on sale)</a></div>
+    </div>
+    <div class="cert-card" style="border-top:2px solid var(--accent4)">
+      <div class="cert-name" style="color:var(--accent4)">SANS GOSI — OSINT Fundamentals</div>
+      <div class="cert-body">The most respected OSINT-specific certification. GIAC Open-Source Intelligence is industry gold but extremely expensive. Target post-employment — many employers fund it.</div>
+      <div class="cert-row"><div class="lbl">Priority</div><span class="tag tag-amber">OPTIONAL — Post-hire</span></div>
+      <div class="cert-row"><div class="lbl">Cost</div><span>~£5,000–£7,000 (course + cert)</span></div>
+      <div class="cert-row"><div class="lbl">Free Alt</div><a href="https://www.tracelabs.org" target="_blank">TraceLabs OSINT for Good</a> — volunteer, build credibility for free</div>
+      <div class="cert-row"><div class="lbl">Budget Alt</div><a href="https://academy.tcm-sec.com/p/osint-fundamentals" target="_blank">TCM Security OSINT cert (~$30)</a> — not GIAC level but very credible on CV</div>
+    </div>
+    <div class="cert-card" style="border-top:2px solid var(--accent3)">
+      <div class="cert-name" style="color:var(--accent3)">Quick Win Certifications</div>
+      <div class="cert-body">Supporting certs that add credibility now and are achievable for free or very low cost — earn these alongside your main study.</div>
+      <div class="cert-row"><div class="lbl">ISC² CC</div><a href="https://www.isc2.org/certifications/cc" target="_blank">Certified in Cybersecurity</a> — <span style="color:var(--accent2)">Free</span> — complete in Month 1</div>
+      <div class="cert-row"><div class="lbl">TryHackMe</div><a href="https://tryhackme.com/paths" target="_blank">SOC Level 1 Path certificate</a> — free, earnable in Phase 2</div>
+      <div class="cert-row"><div class="lbl">Google</div><a href="https://grow.google/certificates/cybersecurity/" target="_blank">Google Cybersecurity Certificate</a> — ~£38/month on Coursera</div>
+      <div class="cert-row"><div class="lbl">HTB</div><a href="https://academy.hackthebox.com/preview/certifications/htb-certified-defensive-security-analyst" target="_blank">HTB CDSA</a> — emerging, hands-on, differentiating</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">◈ CERTIFICATION TIMELINE</div>
+    <table>
+      <thead><tr><th>Certification</th><th>When to Sit</th><th>Cost</th><th>Employer-Funded?</th><th>Hiring Impact</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ISC² CC</strong></td><td>Month 1 — fast win</td><td style="color:var(--accent2)">Free</td><td>N/A</td><td><span class="tag tag-blue">Low–Medium</span></td></tr>
+        <tr><td><strong>TryHackMe SOC L1</strong></td><td>Month 2 — complete path</td><td style="color:var(--accent2)">Free</td><td>N/A</td><td><span class="tag tag-blue">Medium</span></td></tr>
+        <tr><td><strong>CompTIA Security+</strong></td><td>Month 4–5</td><td style="color:var(--accent4)">~£339</td><td>Often post-hire</td><td><span class="tag tag-red">High — essential filter</span></td></tr>
+        <tr><td><strong>CompTIA CySA+</strong></td><td>Month 7–8</td><td style="color:var(--accent4)">~£339</td><td>Very commonly funded</td><td><span class="tag tag-red">High for CTI roles</span></td></tr>
+        <tr><td><strong>GOSI / TCM OSINT</strong></td><td>Post-employment</td><td style="color:var(--red)">£30 – £7,000</td><td>GOSI often funded</td><td><span class="tag tag-green">Differentiator</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- JOBS -->
+<div id="jobs" class="section">
+  <div class="section-header">
+    <div class="section-title">JOB READINESS</div>
+    <div class="section-sub">// ACTIVATES AT 60% — CV, GITHUB, APPLICATION STRATEGY</div>
+  </div>
+  <div class="readiness-gate">
+    <div class="gate-pct">60%</div>
+    <div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:4px">Start Applying at 60% Readiness</div>
+      <div class="dim small">Do not wait until you feel ready. Start applying at 60% — hiring takes 4–8 weeks. You will be more skilled by the time you interview. Applying late is the most common mistake.</div>
+    </div>
+  </div>
+  <div class="grid-2 mb20">
+    <div class="panel">
+      <div class="panel-title">◈ TARGET JOB TITLES</div>
+      <table>
+        <thead><tr><th>Title</th><th>Level</th><th>Key Skills</th><th>UK Salary (Entry)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SOC Analyst Tier 1</strong></td><td><span class="tag tag-green">Entry</span></td><td>SIEM, alert triage, incident basics</td><td>£28–38k</td></tr>
+          <tr><td><strong>Cyber Threat Intel Analyst</strong></td><td><span class="tag tag-green">Entry</span></td><td>OSINT, ATT&CK, report writing, IOCs</td><td>£32–45k</td></tr>
+          <tr><td><strong>OSINT Analyst</strong></td><td><span class="tag tag-green">Entry</span></td><td>OSINT tools, geolocation, investigations</td><td>£28–40k</td></tr>
+          <tr><td><strong>Digital Intelligence Analyst</strong></td><td><span class="tag tag-green">Entry</span></td><td>OSINT, social media, investigations</td><td>£28–42k</td></tr>
+          <tr><td><strong>Threat Researcher</strong></td><td><span class="tag tag-amber">Junior</span></td><td>Malware analysis, CTI lifecycle, dark web</td><td>£35–50k</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel green">
+      <div class="panel-title green">◈ JOB BOARDS TO MONITOR</div>
+      <table>
+        <thead><tr><th>Board</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://www.linkedin.com/jobs/search/?keywords=threat+intelligence+analyst" target="_blank">LinkedIn — CTI Analyst jobs</a></td><td>UK + remote CTI roles, company culture research</td></tr>
+          <tr><td><a href="https://www.cwjobs.co.uk/jobs/cyber-security" target="_blank">CWJobs — Cyber Security</a></td><td>UK IT-specific, strong entry-level coverage</td></tr>
+          <tr><td><a href="https://www.reed.co.uk/jobs/cyber-security-jobs" target="_blank">Reed — Cyber Security</a></td><td>UK-wide, good for smaller companies</td></tr>
+          <tr><td><a href="https://www.ncsccareers.co.uk" target="_blank">NCSC Careers</a></td><td>UK government cyber — excellent for OSINT/CTI</td></tr>
+          <tr><td><a href="https://www.civicajobs.co.uk" target="_blank">Civica / Public Sector Job Boards</a></td><td>NHS, government, public sector analyst roles</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel mb20">
+    <div class="panel-title">◈ CV BULLET POINTS — COPY AND ADAPT</div>
+    <div class="info-box small">Templates — replace [brackets] with specifics. Lead with an action verb. Quantify wherever possible.</div>
+    <div style="margin-bottom:10px"><strong class="accent">OSINT and Investigation:</strong></div>
+    <div class="cv-bullet">Conducted passive OSINT footprinting campaigns using theHarvester, Shodan, and Google Dorking to map attack surfaces — produced structured intelligence reports with risk ratings and remediation recommendations.</div>
+    <div class="cv-bullet">Performed geolocation investigations using open-source imagery analysis techniques including shadow geometry, architectural analysis, and satellite cross-referencing — documented full evidence chains to professional investigative standard.</div>
+    <div class="cv-bullet">Completed [X] OSINT challenges on TryHackMe and CyberDefenders, developing skills in social media OSINT, infrastructure mapping, and OPSEC-aware investigation methodology.</div>
+    <div style="margin:12px 0 10px"><strong style="color:var(--accent2)">Threat Intelligence:</strong></div>
+    <div class="cv-bullet">Authored threat actor profiles for documented APT groups, mapping TTPs to the MITRE ATT&CK framework and producing actionable detection and mitigation recommendations for blue-team consumption.</div>
+    <div class="cv-bullet">Analysed phishing campaigns end-to-end: email header inspection, URL sandboxing via Any.run, IOC extraction, and VirusTotal reputation analysis — produced analyst-grade incident reports.</div>
+    <div class="cv-bullet">Produced full-cycle threat intelligence reports covering executive summaries, technical analysis, attribution assessment with confidence levels, IOC tables, and CISA-aligned mitigation guidance.</div>
+    <div style="margin:12px 0 10px"><strong style="color:var(--accent4)">Tools and Technical:</strong></div>
+    <div class="cv-bullet">Proficient in OSINT toolkit: Maltego CE, Recon-ng, theHarvester, Shodan, Censys, SpiderFoot, MISP, AlienVault OTX, URLscan.io, ExifTool, Any.run.</div>
+    <div class="cv-bullet">Completed TryHackMe SOC Level 1 learning path — practical experience in SIEM alert triage, threat intelligence platforms, phishing analysis, and incident response procedures.</div>
+  </div>
+
+  <div class="panel amber mb20">
+    <div class="panel-title amber">◈ GITHUB POSITIONING STRATEGY</div>
+    <div class="grid-2">
+      <div>
+        <div class="mb8"><strong>Profile README:</strong> Create a repo named <code>[yourusername]/[yourusername]</code> with a README.md — this displays on your GitHub profile. Include: target role, tools you use, links to your 5 projects.</div>
+        <hr>
+        <div class="mb8"><strong>Repository naming:</strong> Professional and searchable. e.g. <code>apt28-threat-profile</code>, <code>osint-footprint-methodology</code>. Avoid <code>project1</code>, <code>test</code>.</div>
+        <hr>
+        <div class="mb8"><strong>README quality:</strong> Every repo needs: what it is, methodology, tools used, key findings, disclaimer. Recruiters scan READMEs first.</div>
+      </div>
+      <div>
+        <div class="mb8"><strong>Pin 6 repos:</strong> Profile → Customize pinned → Pin your 5 project repos + profile README repo.</div>
+        <hr>
+        <div class="mb8"><strong>Topics / tags:</strong> Tag every repo: <code>osint</code>, <code>threat-intelligence</code>, <code>cybersecurity</code>, <code>mitre-attack</code>. Makes you searchable.</div>
+        <hr>
+        <div class="mb8"><strong>LinkedIn link:</strong> Add GitHub URL to your LinkedIn profile. Recruiters check it for security and tech roles — non-negotiable step.</div>
+        <hr>
+        <div class="mb8"><strong>Safety rule:</strong> Only reports and write-ups on public GitHub. Always include scope and disclaimer on footprinting projects.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel orange">
+    <div class="panel-title orange">◈ APPLICATION TIMELINE</div>
+    <table>
+      <thead><tr><th>Week</th><th>Action</th><th>Deliverable</th></tr></thead>
+      <tbody>
+        <tr><td>Week 11</td><td>Polish LinkedIn — headline, about, skills, GitHub link, profile photo</td><td>LinkedIn live and optimised</td></tr>
+        <tr><td>Week 11–12</td><td>Draft CV using above bullets. 2 pages max. ATS-friendly formatting (no tables or text boxes).</td><td>CV v1 ready to send</td></tr>
+        <tr><td>Week 12</td><td>Set up LinkedIn job alerts: "CTI analyst", "OSINT analyst", "SOC analyst" — UK remote + your location</td><td>Job alerts active</td></tr>
+        <tr><td>Week 13</td><td>Send first 3 applications — do not wait for perfection. You will improve mid-process.</td><td>3 applications sent</td></tr>
+        <tr><td>Week 14–15</td><td>Increase to 10+ applications. Tailor CV bullets to each job description. Research company before applying.</td><td>10+ applications sent</td></tr>
+        <tr><td>Week 15+</td><td>Prepare for interviews: explain all 5 projects out loud, prepare "tell me about a threat you investigated" answers</td><td>Interview prep complete</td></tr>
+        <tr><td>Ongoing</td><td>Post on LinkedIn about your projects. Comment on CTI content. Follow: Gerald Auger, NCSC, CISA, Bellingcat</td><td>LinkedIn presence growing</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<script>
+// Clock
+function tick() {
+  const now = new Date();
+  const el = document.getElementById('clock');
+  if(el) el.textContent = now.toLocaleTimeString('en-GB',{hour12:false});
+}
+setInterval(tick,1000); tick();
+
+// Nav
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// Projects
+function toggleProject(id) {
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+// ── ROTA DATA ──
+const ROTA = [
+  {label:'Day 1',type:'work',title:'Environment Setup + OSINT Intro'},
+  {label:'Day 2',type:'work',title:'Networking Basics + Linux CLI'},
+  {label:'Day 3',type:'work',title:'Google Dorking + Shodan'},
+  {label:'Day 4',type:'work',title:'Security+ Domain 1: Threats & Attacks'},
+  {label:'Day 5',type:'work',title:'WHOIS + DNS OSINT'},
+  {label:'Day 6',type:'off', title:'theHarvester Deep Dive + Recon-ng'},
+  {label:'Day 7',type:'off', title:'Maltego CE + TryHackMe Lab'},
+  {label:'Day 8',type:'off', title:'Project Work — OSINT Report Draft'},
+  {label:'Day 9',type:'off', title:'Security+ Study + Review + Plan'},
+];
+
+const TASKS = {
+  1:[
+    {text:'Download VirtualBox (free) from virtualbox.org. Download Kali Linux ISO. Install Kali as a VM. Boot and verify terminal access.',time:'30 min',out:'Kali Linux running in VM'},
+    {text:'Create accounts on all essential platforms: TryHackMe, GitHub, Shodan.io (free tier), AlienVault OTX, VirusTotal.',time:'20 min',out:'5 accounts live'},
+    {text:'Browse osintframework.com. Click through the tree. Note 5 categories you will use first. Write them in a notes.md on GitHub.',time:'10 min',out:'First GitHub commit made'},
+  ],
+  2:[
+    {text:'Watch Professor Messer Sec+ SY0-701 — first 20 minutes covering networking fundamentals (TCP/IP, DNS, HTTP). Take structured notes.',time:'25 min',out:'Networking notes doc'},
+    {text:'Open Kali terminal. Practice CLI commands: ls, cd, pwd, cat, grep, find, nano, man. Navigate to /etc and /var/log.',time:'25 min',out:'CLI comfort confirmed'},
+    {text:'Read one NCSC threat report (ncsc.gov.uk). Summarise in 3 bullet points. Start a "Daily Intel" section in your notes.',time:'10 min',out:'Daily intel habit started'},
+  ],
+  3:[
+    {text:'Study Google Dorking operators: site:, filetype:, intitle:, inurl:, "exact phrase", -exclude. Run 10 test searches on a public domain.',time:'30 min',out:'Dorking cheat sheet (markdown)'},
+    {text:'Log into Shodan.io. Search for "Apache 2.4" then search for an IP from your test domain. Explore banner data, ports, vulnerabilities shown.',time:'20 min',out:'Shodan exploration notes'},
+    {text:'Read Bellingcat guide to Shodan at bellingcat.com. Note 2 techniques not covered in Shodan\'s own docs.',time:'10 min',out:'Shodan advanced techniques noted'},
+  ],
+  4:[
+    {text:'Watch Professor Messer Domains 1.1 and 1.2: threat actors, attack types, social engineering. Take detailed notes with examples.',time:'35 min',out:'Domain 1 notes complete'},
+    {text:'Complete 20 ExamCompass practice questions on Domain 1. Record your score. Note every wrong answer.',time:'15 min',out:'Practice score logged (target 70%+)'},
+    {text:'Add all wrong-answer topics to a flashcard system (Anki free, or Quizlet). Review before sleep.',time:'10 min',out:'Flashcard deck started'},
+  ],
+  5:[
+    {text:'WHOIS lookup on 3 different domains using who.is. Compare registrar, creation date, name servers. Note any privacy-protected registrations.',time:'20 min',out:'WHOIS comparison table'},
+    {text:'Use DNSdumpster.com on your test domain. Map all subdomains discovered. Screenshot the visual graph.',time:'20 min',out:'DNS map screenshot in notes'},
+    {text:'Check threatpost.com for today\'s top story. Write a 3-line analyst summary: What happened, who was affected, what should defenders do.',time:'20 min',out:'Daily intel summary'},
+  ],
+  6:[
+    {text:'Run theHarvester in Kali: theHarvester -d [testdomain] -b all. Log every email address, IP, and subdomain found. Screenshot terminal output.',time:'60 min',out:'theHarvester raw output log'},
+    {text:'Install Recon-ng: type recon-ng in Kali. Work through the TryHackMe Recon-ng room (free). Test 3 modules.',time:'60 min',out:'Recon-ng 3 modules tested'},
+    {text:'Create your Project 1 GitHub repo. Write README.md with: objective, target description, tools used, scope, disclaimer.',time:'45 min',out:'GitHub repo created with README'},
+    {text:'Watch any TCM Security OSINT YouTube video (30 min). List any new tools or techniques not yet in your notes.',time:'30 min',out:'New tools shortlist'},
+  ],
+  7:[
+    {text:'Download Maltego CE (free community version) from maltego.com. Create a free account. Complete the built-in first-run tutorial. Create your first entity graph.',time:'90 min',out:'Maltego installed, first graph created'},
+    {text:'Complete TryHackMe free room: "Google Dorking". Get all flags. Screenshot your completion.',time:'60 min',out:'TryHackMe room completed — screenshot'},
+    {text:'Watch Professor Messer Security+ Domain 2 (first 30 mins): Architecture and Design. Take notes.',time:'30 min',out:'Domain 2 notes started'},
+    {text:'Review all notes from Days 1–6. Add any gaps to flashcard deck. Check GitHub has been committed to.',time:'30 min',out:'Notes consolidated, GitHub updated'},
+  ],
+  8:[
+    {text:'Select your Project 1 target. Create rules-of-engagement.md: what you will do, what you won\'t, target domain, date. This is critical for your portfolio.',time:'30 min',out:'rules-of-engagement.md committed'},
+    {text:'Run full OSINT pass on target: theHarvester, Shodan, WHOIS, DNSdumpster, Google Dorking, LinkedIn employee search. Log everything.',time:'120 min',out:'Raw findings log (markdown)'},
+    {text:'Write Project 1 report — Executive Summary and Methodology sections. Use a professional tone.',time:'60 min',out:'Report draft started — committed to GitHub'},
+    {text:'Screenshot all evidence and organise into /screenshots/ folder. Name files descriptively (e.g., shodan-port-443.png).',time:'30 min',out:'Evidence folder organised'},
+  ],
+  9:[
+    {text:'Complete Professor Messer Domain 2 in full. Watch all videos, take notes, add new terms to flashcards.',time:'60 min',out:'Domain 2 notes complete'},
+    {text:'Take 40 ExamCompass mixed practice questions (Domains 1 and 2 combined). Log score. Target 70%+.',time:'40 min',out:'Practice score logged'},
+    {text:'Finish Project 1 report. Add Findings section with risk ratings. Commit final version to GitHub. Post on LinkedIn: "Published my first OSINT investigation report."',time:'60 min',out:'Project 1 live on GitHub + LinkedIn post'},
+    {text:'Plan Cycle 2: write a 9-day plan based on what content is next (Phase 1 continues until Week 4). Note what felt slow last cycle.',time:'20 min',out:'Cycle 2 plan written'},
+  ],
+};
+
+function buildDays() {
+  const sel = document.getElementById('day-selector');
+  ROTA.forEach((d,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn ' + d.type;
+    btn.innerHTML = `<strong>${d.label}</strong><br><span style="font-size:10px;line-height:1.2">${d.type==='work'?'🔴 Work · 1hr':'🟢 Off · 3–5hr'}</span>`;
+    btn.onclick = () => { document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderDay(i+1); };
+    sel.appendChild(btn);
+  });
+}
+
+function renderDay(n) {
+  const d = ROTA[n-1];
+  const tasks = TASKS[n] || [];
+  const saved = getSaved('done_day'+n);
+  let html = `<div class="panel ${d.type==='off'?'green':'orange'}">
+    <div class="panel-title ${d.type==='off'?'green':'orange'}">◈ ${d.label.toUpperCase()} — ${d.title}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="tag ${d.type==='work'?'tag-orange':'tag-green'}">${d.type==='work'?'🔴 WORK — 1 HOUR':'🟢 DAY OFF — 3–5 HOURS'}</span>
+      <span class="tag tag-blue">Phase 1</span>
+      <span class="dim mono small">Rota Day ${n} of 9</span>
+    </div>`;
+
+  if(tasks.length) {
+    tasks.forEach((t,i) => {
+      const done = saved.includes(i);
+      html += `<div class="task-item ${done?'done':''}" onclick="toggleTask(${n},${i},this)">
+        <div class="task-check"></div>
+        <div class="task-text"><div style="font-weight:600;margin-bottom:2px">${t.text}</div><div class="dim small">📤 Output: <span style="color:var(--accent2)">${t.out}</span></div></div>
+        <div class="task-time">⏱ ${t.time}</div>
+      </div>`;
+    });
+  }
+
+  html += `<hr><div class="info-box small" style="margin-bottom:0"><strong class="accent">◈ CYCLE NOTE:</strong> This 9-day cycle repeats throughout all 4 phases. Work days = focused 1-hour deep sessions. Days off = lab work, projects, extended study. In Cycle 2+, advance the content to the next phase topics while keeping this same daily format.</div></div>`;
+  document.getElementById('day-content').innerHTML = html;
+}
+
+function toggleTask(day, idx, el) {
+  el.classList.toggle('done');
+  let s = getSaved('done_day'+day);
+  if(s.includes(idx)) s = s.filter(i=>i!==idx); else s.push(idx);
+  localStorage.setItem('done_day'+day, JSON.stringify(s));
+}
+
+function getSaved(key) {
+  try { return JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){ return []; }
+}
+
+buildDays();
+setTimeout(()=>{ const first = document.querySelector('.day-btn'); if(first){first.classList.add('active');renderDay(1);} },100);
+
+// ── SKILLS ──
+const SKILL_DATA = {
+  osint:[
+    'Google Dorking & Advanced Search Operators',
+    'Shodan / Censys Asset Discovery',
+    'WHOIS & DNS Enumeration (theHarvester)',
+    'Recon-ng Reconnaissance Framework',
+    'Maltego CE Link Analysis & Graphing',
+    'Social Media OSINT Techniques',
+    'Reverse Image Search (Google, Yandex, TinEye)',
+    'Geolocation via Imagery & Shadow Analysis',
+    'ExifTool Metadata Extraction',
+    'Wayback Machine Historical OSINT',
+    'SpiderFoot Automated Recon',
+    'OSINT Report Writing (structured methodology)',
+    'Target Scoping & Rules of Engagement',
+    'Passive vs Active Reconnaissance',
+    'OSINT Framework Navigation',
+  ],
+  cti:[
+    'Threat Intelligence Lifecycle (D3A/F3EAD)',
+    'MITRE ATT&CK Framework — Navigation & Use',
+    'ATT&CK Navigator — Creating & Exporting Layers',
+    'IOC Types (IPs, Domains, Hashes, URLs, Emails)',
+    'STIX / TAXII Concepts',
+    'MISP Threat Sharing Platform (basics)',
+    'AlienVault OTX Pulse Analysis',
+    'Malware Sandbox Analysis (Any.run)',
+    'VirusTotal & URLscan.io Investigation',
+    'Phishing Email Header Analysis',
+    'APT Group Research from Open Sources',
+    'Threat Actor Profiling Methodology',
+    'Strategic vs Tactical vs Operational Intel',
+    'Intelligence Assessment Language & Confidence Levels',
+    'Abuse.ch / MalwareBazaar IOC Feeds',
+  ],
+  sec:[
+    'CIA Triad & Core Security Concepts',
+    'Networking: TCP/IP, DNS, HTTP/S, Key Ports',
+    'Authentication & Access Control Concepts',
+    'Cryptography Basics (symmetric, asymmetric, hashing)',
+    'PKI & Digital Certificate Concepts',
+    'Network Security Devices (Firewall, IDS, IPS)',
+    'Vulnerability Management Lifecycle',
+    'Incident Response 6-Step Lifecycle',
+    'SIEM Concepts & Log Analysis Basics',
+    'Cloud Security Fundamentals',
+    'Risk Management Framework Concepts',
+    'Compliance Awareness (GDPR, ISO 27001)',
+    'Linux CLI for Security (file perms, logs, processes)',
+    'Kali Linux Core Tool Familiarity',
+    'Security+ All 6 Domains Studied',
+  ],
+};
+
+const THRESHOLDS = {osint:75, cti:70, sec:65};
+
+function buildSkills() {
+  ['osint','cti','sec'].forEach(cat => {
+    const el = document.getElementById(cat+'-skills');
+    const saved = getSaved('skills_'+cat);
+    let html = '';
+    SKILL_DATA[cat].forEach((s,i) => {
+      const done = saved.includes(i);
+      html += `<div class="task-item ${done?'done':''}" onclick="toggleSkill('${cat}',${i},this)">
+        <div class="task-check"></div>
+        <div class="task-text" style="font-size:13px">${s}</div>
+      </div>`;
+    });
+    if(el) el.innerHTML = html;
+    updateSkillUI(cat);
+  });
+}
+
+function toggleSkill(cat, idx, el) {
+  el.classList.toggle('done');
+  let s = getSaved('skills_'+cat);
+  if(s.includes(idx)) s = s.filter(i=>i!==idx); else s.push(idx);
+  localStorage.setItem('skills_'+cat, JSON.stringify(s));
+  updateSkillUI(cat);
+}
+
+function updateSkillUI(cat) {
+  const saved = getSaved('skills_'+cat);
+  const total = SKILL_DATA[cat].length;
+  const pct = Math.round((saved.length/total)*100);
+  const thresh = THRESHOLDS[cat];
+  const pctEl = document.getElementById(cat+'-pct');
+  const gateEl = document.getElementById(cat+'-gate');
+  const fillEl = document.getElementById(cat+'-fill');
+  if(pctEl) pctEl.textContent = pct+'%';
+  if(gateEl) gateEl.textContent = pct+'% / '+thresh+'%';
+  if(fillEl) fillEl.style.width = pct+'%';
+}
+
+buildSkills();
+</script>
+</body>
+</html>
