@@ -1163,6 +1163,42 @@ function updateSkillUI(cat) {
 }
 
 buildSkills();
+  <section style="margin-top:40px;">
+  <h2>📅 Daily Tracker</h2>
+
+  <form name="osint-tracker" method="POST" data-netlify="true">
+    <input type="hidden" name="form-name" value="osint-tracker">
+
+    <label>Day (1–9 Cycle)</label>
+    <input type="number" name="day" required>
+
+    <label>Task</label>
+    <textarea name="task" required></textarea>
+
+    <label>Time Spent</label>
+    <input type="text" name="time" required>
+
+    <label>What I Did</label>
+    <textarea name="did" required></textarea>
+
+    <label>What I Learned</label>
+    <textarea name="learned" required></textarea>
+
+    <label>Output Link</label>
+    <input type="text" name="output">
+
+    <label>Skill Focus</label>
+    <select name="skill">
+      <option>Networking</option>
+      <option>OSINT</option>
+      <option>Threat Intel</option>
+      <option>Labs</option>
+    </select>
+
+    <button type="submit">Save Entry</button>
+  </form>
+</section>
+
 </script>
 </body>
 </html>
